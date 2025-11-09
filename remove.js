@@ -23,13 +23,16 @@ const PEOPLE_ALSO_ASK = [
 const SEARCH_DIV_ID = "search";
 const GENERIC_WAIT_DELAY = 200;
 
-const returnMatch = (mx_body) => {
-  if (mx_body.length == 0) {
+const returnMatch = (overview_tag_candidate) => {
+  if (!overview_tag_candidate) {
     return null;
   }
-  return AI_OVERVIEW_MATCHES.some((word) =>
-    word.includes(mx_body[0].innerText.toLowerCase()),
-  );
+  return AI_OVERVIEW_MATCHES.some((word) => {
+    const response = word.includes(
+      overview_tag_candidate.innerText.toLowerCase(),
+    );
+    return response;
+  });
 };
 
 const returnPAAMatch = (span) => {
@@ -55,13 +58,19 @@ let muO = new MutationObserver((list, _o) => {
   }
 });
 
-const removeOverview = (mx_body) => {
+const findOverviewTag = () => {
+  const options = document.getElementsByTagName("h1");
+  return [...options].find((option) => returnMatch(option));
+};
+
+const removeOverview = () => {
   return new Promise((resolve, reject) => {
-    if (mx_body && mx_body[0] && returnMatch(mx_body)) {
-      let parent = mx_body[0].parentNode;
+    const overViewTag = findOverviewTag();
+    if (overViewTag) {
+      let parent = overViewTag.parentNode;
       let i = 0;
       let currentNode = parent;
-      while (i < 9) {
+      while (i < 7) {
         currentNode = currentNode.parentNode;
         i++;
       }
@@ -74,8 +83,7 @@ const removeOverview = (mx_body) => {
 };
 
 const overViewCall = async () => {
-  let mx_body = document.getElementsByTagName("strong");
-  return await removeOverview(mx_body);
+  return await removeOverview();
 };
 
 const genericRetryFunction = async (attempts, maxAttempts = 50, callback) => {
